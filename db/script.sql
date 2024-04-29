@@ -1,16 +1,30 @@
-CREATE DATABASE ativback01;
+CREATE DATABASE harrypotter;
 
-\c ativback01
+\c harrypotter
 
-CREATE TABLE usuarios (
+CREATE TABLE bruxo (
 id SERIAL PRIMARY KEY,
 nome VARCHAR(100) NOT NULL,
-email VARCHAR(100) NOT NULL,
-datanascimento DATE NOT NULL,
-idade INTEGER,
-signo VARCHAR(20));
+idade INTEGER NOT NULL,
+casa_hogwarts VARCHAR(20) NOT NULL,
+habilidade_especial VARCHAR(50) NOT NULL,
+status_sangue VARCHAR(30) NOT NULL,
+patrono VARCHAR(40) NOT NULL);
 
 \d
 
 
-SELECT * FROM usuarios;
+SELECT * FROM bruxo;
+
+
+
+CREATE TABLE varinha (
+id SERIAL PRIMARY KEY,
+material VARCHAR(100) NOT NULL,
+comprimento VARCHAR(20) NOT NULL,
+nucleo VARCHAR(50) NOT NULL,
+data_fabricacao DATE NOT NULL);
+
+\d
+
+SELECT * FROM varinha ;

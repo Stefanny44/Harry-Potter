@@ -2,151 +2,229 @@ const express = require('express');
 const { Pool } = require('pg');
 
 const app = express();
-const PORT = 3080;
+const PORT = 3090;
 
 
 const pool = new Pool({
     user: 'postgres',
     host: 'localhost',
-    database: 'ativback01',
+    database: 'harrypotter',
     password: 'ds564',
     port: 7007,
 });
 
 
 
-function calcularIdade(dataNascimento) {
-    const hoje = new Date();
-    let idade = hoje.getFullYear() - dataNascimento.getFullYear();
-    const mesAtual = hoje.getMonth();
-    const mesNascimento = dataNascimento.getMonth();
-    if (mesNascimento > mesAtual || (mesNascimento === mesAtual && hoje.getDate() < dataNascimento.getDate())) {
-      idade--;
-    }
-    return idade;
-  }
-  function calcularSigno(mes, dia) {
-    if ((mes === 1 && dia >= 20) || (mes === 2 && dia <= 18)) {
-      return 'Aquário';
-    } else if ((mes === 2 && dia >= 19) || (mes === 3 && dia <= 20)) {
-      return 'Peixes';
-    } else if ((mes === 3 && dia >= 21) || (mes === 4 && dia <= 19)) {
-      return 'Áries';
-    } else if ((mes === 4 && dia >= 20) || (mes === 5 && dia <= 20)) {
-      return 'Touro';
-    } else if ((mes === 5 && dia >= 21) || (mes === 6 && dia <= 20)) {
-      return 'Gêmeos';
-    } else if ((mes === 6 && dia >= 21) || (mes === 7 && dia <= 22)) {
-      return 'Câncer';
-    } else if ((mes === 7 && dia >= 23) || (mes === 8 && dia <= 22)) {
-      return 'Leão';
-    } else if ((mes === 8 && dia >= 23) || (mes === 9 && dia <= 22)) {
-      return 'Virgem';
-    } else if ((mes === 9 && dia >= 23) || (mes === 10 && dia <= 22)) {
-      return 'Libra';
-    } else if ((mes === 10 && dia >= 23) || (mes === 11 && dia <= 21)) {
-      return 'Escorpião';
-    } else if ((mes === 11 && dia >= 22) || (mes === 12 && dia <= 21)) {
-      return 'Sagitário';
-    } else {
-      return 'Capricórnio'; 
-    }
-  }
 
 
 
-
-
-
-
-
-  
 
   app.use(express.json());
+
+
+
+  // get rota funfando
 
   app.get('/', (req, res) => {
       res.send('A rota está funcionando');
   });
+
+  app.get('/', (req, res) => {
+    res.send('A rota está funcionando!!!');
+});
+
   
+
+
+ //get rota
   
-  app.get('/usuarios', async (req, res) => {
+  app.get('/bruxo', async (req, res) => {
       try {
-          const resultado = await pool.query('SELECT * FROM usuarios');
+          const resultado = await pool.query('SELECT * FROM bruxo');
           res.json({
               total: resultado.rowCount,
-              usuarios: resultado.rows,
+              bruxo: resultado.rows,
           });
       } catch (error) {
-          console.error('Erro ao obter todos os usuarios', error);
-          res.status(500).send('Erro ao obter os usuarios');
+          console.error('Erro ao obter todos os bruxos', error);
+          res.status(500).send('Erro ao obter os bruxos cadastrados');
       }
   });
-  
+
+  app.get('/varinha', async (req, res) => {
+    try {
+        const resultado = await pool.query('SELECT * FROM varinha');
+        res.json({
+            total: resultado.rowCount,
+            varinha: resultado.rows,
+        });
+    } catch (error) {
+        console.error('Erro ao obter todos as varinhas', error);
+        res.status(500).send('Erro ao obter as varinhas');
+    }
+});
   
 
 
-   app.post('/usuarios', async (req, res) => {
+
+
+
+  
+
+// post
+
+   app.post('/bruxo', async (req, res) => {
      try {
-       const { nome, email, datanascimento } = req.body;
-       const dataNascimento = new Date(datanascimento);
-       const idade = calcularIdade(dataNascimento);
-       const signo = calcularSigno(dataNascimento.getMonth() + 1, dataNascimento.getDate());
+       const { nome, idade, casa_hogwarts, habilidade_especial, status_sangue, patrono } = req.body;
+       let casas = ["Grifinória", "Corvinal", "Sonserina", "Lufa-Lufa"];
+       let sangue = ["Sangue puro", "Mestiço", "Trouxa"]
 
-       await pool.query('INSERT INTO usuarios (nome, email, datanascimento, idade, signo) VALUES ($1, $2, $3, $4, $5)', [nome, email, datanascimento, idade, signo]);
-       res.status(201).send({ mensagem: 'Usuário adicionado com sucesso!OK'});
+       if (!casas.includes(casa_hogwarts )) {
+        res.status(500).send('A casa precisa ser: Grifinória, Corvinal, Sonserina ou Lufa-Lufa');
+       } else if (!sangue.includes(status_sangue)){
+        res.status(500).send('O sangue precisa ser: Sangue puro, Mestiço ou Trouxa');
+       } else {
+        await pool.query('INSERT INTO bruxo (nome, idade, casa_hogwarts, habilidade_especial, status_sangue, patrono) VALUES ($1, $2, $3, $4, $5, $6)', [nome, idade, casa_hogwarts, habilidade_especial, status_sangue, patrono]);
+        res.status(201).send({ mensagem: 'Bruxo adicionado com sucesso!OK'});
+       }
+       
+       
      } catch (error) {
-       console.error('Erro ao adicionar usuário:', error);
-       res.status(500).send('Erro ao adicionar usuário');
+       console.error('Erro ao adicionar bruxo:', error);
+       res.status(500).send('Erro ao adicionar bruxo');
      }
    });
+
+   app.post('/varinha', async (req, res) => {
+    try {
+      const { material, comprimento, nucleo, data_fabricacao} = req.body;
+     
+      await pool.query('INSERT INTO varinha (material, comprimento, nucleo, data_fabricacao) VALUES ($1, $2, $3, $4)', [material, comprimento, nucleo, data_fabricacao]);
+      res.status(201).send({ mensagem: 'Varinha adicionado com sucesso!OK'});
+    } catch (error) {
+      console.error('Erro ao adicionar varinha:', error);
+      res.status(500).send('Erro ao adicionar varinha');
+    }
+  });
+
+
+
   
   
-  
-  app.delete('/usuarios/:id', async (req, res) => {
+  // DELETE
+  app.delete('/bruxo/:id', async (req, res) => {
       try {
           const {id} = req.params;
-          const resultado = await pool.query('DELETE FROM usuarios WHERE id = $1', [id]);
-          res.status(200).send({mensagem: 'usuario deletado com sucesso'})
+          const resultado = await pool.query('DELETE FROM bruxo WHERE id = $1', [id]);
+          res.status(200).send({mensagem: 'bruxo deletado com sucesso'})
       } catch (error) {
-          console.error('Erro ao apagar usuario', error);
-          res.status(500).send('Erro ao apagar o usuario');
+          console.error('Erro ao deletar bruxo', error);
+          res.status(500).send('Erro ao deletar o bruxo');
       }
   });
+
+  app.delete('/varinha/:id', async (req, res) => {
+    try {
+        const {id} = req.params;
+        const resultado = await pool.query('DELETE FROM varinha WHERE id = $1', [id]);
+        res.status(200).send({mensagem: 'varinha deletada com sucesso'})
+    } catch (error) {
+        console.error('Erro ao deletar a varinha', error);
+        res.status(500).send('Erro ao deletar a varinha');
+    }
+});
+
+
+
+
+
+
   
-  
-   app.put('/usuarios/:id', async (req, res) => {
+  // put por id
+   app.put('/bruxo/:id', async (req, res) => {
        try {
            const { id } = req.params;
-           const { nome, email   } = req.body;
-          
+           const { nome, idade, casa_hogwarts, habilidade_especial, status_sangue, patrono   } = req.body;
+           let casas = ["Grifinória", "Corvinal", "Sonserina", "Lufa-Lufa"];
+           let sangue = ["Sangue puro", "Mestiço", "Trouxa"]
+    
+           if (!casas.includes(casa_hogwarts )) {
+            res.status(500).send('A casa precisa ser: Grifinória, Corvinal, Sonserina ou Lufa-Lufa');
+           } else if (!sangue.includes(status_sangue)){
+            res.status(500).send('O sangue precisa ser: Sangue puro, Mestiço ou Trouxa');
+           } else {
+            await pool.query('UPDATE bruxo SET nome = $1, idade = $2, casa_hogwarts = $3, habilidade_especial = $4, status_sangue = $5, patrono = $6 WHERE id = $7', [nome, idade, casa_hogwarts, habilidade_especial, status_sangue, patrono, id])
+            res.status(200).send({mensagem: 'bruxo atualizado com sucesso'})
+           }
 
-           await pool.query('UPDATE usuarios SET nome = $1, email = $2 WHERE id = $3', [nome, email, datanascimento, id])
-           res.status(200).send({mensagem: 'usuario atualizado com sucesso'})
+           
        } catch (error) {
-           console.error('Erro ao atualizar', error);
-           res.status(500).send('Erro ao atualizar');
+           console.error('Erro ao atualizar bruxo', error);
+           res.status(500).send('Erro ao atualizar bruxo');
        }
    });
+
+   app.put('/varinha/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { material, comprimento, nucleo, data_fabricacao   } = req.body;
+       
+
+        await pool.query('UPDATE bruxo SET material = $1, comprimento = $2, nucleo = $3, data_fabricacao = $4 WHERE id = $5', [material, comprimento, nucleo, data_fabricacao, id])
+        res.status(200).send({mensagem: 'varinha atualizada com sucesso'})
+    } catch (error) {
+        console.error('Erro ao atualizar varinha', error);
+        res.status(500).send('Erro ao atualizar varinha');
+    }
+});
   
-  
-  app.get('/usuarios/:id', async(req, res) => {
+
+
+
+
+
+
+  // get por id
+  app.get('/bruxo/:id', async(req, res) => {
       try {
           const { id } = req. params;
-          const resultado = await pool.query('SELECT * FROM usuarios WHERE id = $1', [id])
+          const resultado = await pool.query('SELECT * FROM bruxo WHERE id = $1', [id])
           if(resultado.rowCount == 0){
               res.status(404).send({mensagem: 'Id não encontrado'});
           }
           res.json({
-              usuarios: resultado.rows[0],
+              bruxo: resultado.rows[0],
           })
       } catch (error) {
-          console.error('Erro ao pegar usuario por ID ', error);
-          res.status(500).send('Erro ao pegar usuario por ID');
+          console.error('Erro ao pegar bruxo por ID ', error);
+          res.status(500).send('Erro ao pegar bruxo por ID');
       }
   });
+
+  app.get('/varinha/:id', async(req, res) => {
+    try {
+        const { id } = req. params;
+        const resultado = await pool.query('SELECT * FROM varinha WHERE id = $1', [id])
+        if(resultado.rowCount == 0){
+            res.status(404).send({mensagem: 'Id não encontrado'});
+        }
+        res.json({
+            varinha: resultado.rows[0],
+        })
+    } catch (error) {
+        console.error('Erro ao pegar varinha por ID ', error);
+        res.status(500).send('Erro ao pegar varinha por ID');
+    }
+});
   
   
   
+
+
+
+
+
+
   
   
   app.listen(PORT, () => {
